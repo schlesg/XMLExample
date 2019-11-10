@@ -70,12 +70,9 @@ For more information about XML QoS Profiles see Chapter 17 in the
 RTI Connext user manual.
 -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="C:/Program Files/rti_connext_dds-5.3.1/bin/../resource/schema/rti_dds_qos_profiles.xsd"
+     xsi:noNamespaceSchemaLocation="C:/Program Files/rti_connext_dds-5.3.1/bin/../resource/schema/rti_dds_profiles.xsd"
      version="5.3.1">
-    <!-- QoS Library containing the QoS profile used in the generated example.
 
-        A QoS library is a named set of QoS profiles.
-    -->
     <qos_library name="myExample_Library">
 
         <!-- QoS profile used to configure reliable communication between the DataWriter 
@@ -86,16 +83,16 @@ RTI Connext user manual.
         <qos_profile name="myExample_Profile" base_name="BuiltinQosLibExp::Generic.StrictReliable" is_default_qos="true">
             <!-- QoS used to configure the data writer created in the example code -->                
             <datawriter_qos>
-                <publication_name>
+                <!--<publication_name>
                     <name>myExampleDataWriter</name>
-                </publication_name>
+                </publication_name>-->
             </datawriter_qos>
 
             <!-- QoS used to configure the data reader created in the example code -->                
             <datareader_qos>
-                <subscription_name>
+                <!--<subscription_name>
                     <name>myExampleDataReader</name>
-                </subscription_name>
+                </subscription_name>-->
             </datareader_qos>
             <participant_qos>
                 <!--
@@ -112,4 +109,25 @@ RTI Connext user manual.
         </qos_profile>
 
     </qos_library>
+
+  <domain_library name="ExampleDomainLib">
+    <domain name="ExampleDomain" domain_id="0">
+      <topic name="Example MySturct" register_type_ref="MySturct"/>
+    </domain>
+  </domain_library>
+
+  <domain_participant_library name="ExampleDPLib">
+    <domain_participant name="ExamplePubDP" domain_ref="ExampleDomainLib::ExampleDomain">
+      <publisher name="Publisher">
+        <data_writer name="ExampleTopic_DW" topic_ref="Example MySturct"/>
+      </publisher>
+    </domain_participant>
+
+    <domain_participant name="ExampleSubDP" domain_ref="ExampleDomainLib::ExampleDomain">
+      <subscriber name="Subscriber">
+        <data_reader name="ExampleTopic_DR" topic_ref="Example MySturct"/>
+      </subscriber>
+    </domain_participant>
+    
+  </domain_participant_library>
 </dds>

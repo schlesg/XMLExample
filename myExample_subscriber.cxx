@@ -50,6 +50,10 @@ objs\<arch>\myExample_subscriber <domain_id>
 #include <dds/core/ddscore.hpp>
 // Or simply include <dds/dds.hpp> 
 
+//GS - In order to allow loading the QOSProvider
+#include <dds/core/QosProvider.hpp>
+#include <dds/sub/DataReader.hpp>
+
 #include "myExample.hpp"
 
 class MySturctReaderListener : public dds::sub::NoOpDataReaderListener<MySturct> {
@@ -85,20 +89,27 @@ class MySturctReaderListener : public dds::sub::NoOpDataReaderListener<MySturct>
 
 void subscriber_main(int domain_id, int sample_count)
 {
-    // Create a DomainParticipant with default Qos
-    dds::domain::DomainParticipant participant(domain_id);
-
-    // Create a Topic -- and automatically register the type
-    dds::topic::Topic<MySturct> topic(participant, "Example MySturct");
-
-    // Create a DataReader with default Qos (Subscriber created in-line)
+	rti::domain::register_type<MySturct>("MySturct");
+	auto participant = dds::core::QosProvider::Default()->create_participant_from_config("ExampleDPLib::ExampleSubDP");
+	dds::sub::DataReader<MySturct> reader = rti::sub::find_datareader_by_name<dds::sub::DataReader<MySturct>>(
+		participant,
+		"Subscriber::ExampleTopic_DR"
+		);
     MySturctReaderListener listener;
-    dds::sub::DataReader<MySturct> reader(
-        dds::sub::Subscriber(participant),
-        topic,
-        dds::core::QosProvider::Default().datareader_qos(),
-        &listener,
-        dds::core::status::StatusMask::data_available());
+	reader->listener(&listener, dds::core::status::StatusMask::data_available());
+    // Create a DomainParticipant with default Qos
+    //dds::domain::DomainParticipant participant(domain_id);
+
+    //// Create a Topic -- and automatically register the type
+    //dds::topic::Topic<MySturct> topic(participant, "Example MySturct");
+
+    //// Create a DataReader with default Qos (Subscriber created in-line)
+    //dds::sub::DataReader<MySturct> reader(
+    //    dds::sub::Subscriber(participant),
+    //    topic,
+    //    dds::core::QosProvider::Default().datareader_qos(),
+    //    &listener,
+    //    dds::core::status::StatusMask::data_available());
 
     while (listener.count() < sample_count || sample_count == 0) {
         std::cout << "MySturct subscriber sleeping for 4 sec..." << std::endl;
